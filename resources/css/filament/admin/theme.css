@@ -1,0 +1,20 @@
+@config './tailwind.config.js';
+
+/* ---- تعديل الصفحة ---- */
+
+/* الخلفية العامة */
+.fi-main,
+.fi-main-content {
+    @apply bg-white dark:bg-slate-900;
+}
+
+/* القائمة الجانبية */
+.fi-sidebar {
+    @apply bg-black text-white;
+    @apply dark:bg-white dark:text-slate-900;
+}
+
+/* الروابط داخل القائمة */
+.fi-sidebar .fi-sidebar-item-button {
+    @apply hover:bg-white/10 dark:hover:bg-black/10;
+}
