@@ -78,13 +78,10 @@ class ClinicAppointmentController extends Controller
             ], 400);
         }
 
-        // بناء قائمة الفحوصات المطلوبة
-        $examinations = $appointment->examinationRequests->map(function ($examRequest) {
-            return [
-                'examination_item_id' => $examRequest->examination_item_id,
-                'examination_item_name' => $examRequest->examinationItem->name ?? null,
-            ];
-        })->values();
+        $examinations = $appointment->examinationRequests
+            ->pluck('examinationItem.name')
+            ->filter()
+            ->values();   // النتيجة Collection، كما كانت من قبل
 
         return response()->json([
             'status' => 200,

@@ -81,12 +81,10 @@ public function show(Request $request, int $appointment_id): JsonResponse
     }
 
     // بناء مصفوفة الفحوصات المطلوبة
-    $examinations = $appointment->examinationRequests->map(function ($examRequest) {
-        return [
-            'examination_item_id' => $examRequest->examination_item_id,
-            'examination_item_name' => $examRequest->examinationItem->name ?? null,
-        ];
-    })->values();
+    $examinations = $appointment->examinationRequests
+        ->pluck('examinationItem.name')
+        ->filter()   // لاستبعاد القيم null (إذا كان examinationItem غير موجود)
+        ->values();  // لإعادة ترتيب المفاتيح من 0
 
     // تجهيز الاستجابة
     return response()->json([
