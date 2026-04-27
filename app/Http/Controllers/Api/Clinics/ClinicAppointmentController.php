@@ -7,6 +7,8 @@ use App\Models\ClinicAppointment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\LabAppointment;
+use Illuminate\Support\Facades\Storage;
 
 class ClinicAppointmentController extends Controller
 {
@@ -44,6 +46,7 @@ class ClinicAppointmentController extends Controller
         ], 200);
     }
 
+
     /**
      * GET /api/clinics/appointments/{appointment_id}
      * عرض تفاصيل حجز معين يخص عيادة المالك المسجل دخوله.
@@ -64,7 +67,7 @@ class ClinicAppointmentController extends Controller
             ->with([
                 'patient.user:id,name',
                 'wallet:id,name',
-                'examinationRequests:id,clinic_appointment_id,examination_item_id',
+                'examinationRequests:id,clinic_appointment_id,lab_appointment_id,examination_item_id',
                 'examinationRequests.examinationItem:id,name',
                 'nextAppointment:id,previous_appointment_id',
             ])
@@ -78,10 +81,20 @@ class ClinicAppointmentController extends Controller
             ], 400);
         }
 
+        // ✅ معالجة حقل result
+        $result = null;
+        $firstExamRequest = $appointment->examinationRequests->first();
+        if ($firstExamRequest && $firstExamRequest->lab_appointment_id) {
+            $labAppointment = LabAppointment::find($firstExamRequest->lab_appointment_id);
+            if ($labAppointment && $labAppointment->result) {
+                $result = Storage::url($labAppointment->result);
+            }
+        }
+
         $examinations = $appointment->examinationRequests
             ->pluck('examinationItem.name')
             ->filter()
-            ->values();   // النتيجة Collection، كما كانت من قبل
+            ->values();
 
         return response()->json([
             'status' => 200,
@@ -101,6 +114,7 @@ class ClinicAppointmentController extends Controller
                 'rejection_reason' => $appointment->rejection_reason,
                 'diagnosis' => $appointment->diagnosis,
                 'medications' => $appointment->medications,
+                'result' => $result,
                 'examinations' => $examinations,
                 'next_appointment_id' => $appointment->nextAppointment->id ?? null,
                 'follow_up_date' => $appointment->follow_up_date?->toDateString(),

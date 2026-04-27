@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Labs\LabAppointmentController as LabOwnerAppointmen
 use App\Http\Controllers\Api\Labs\LabExaminationController;
 use App\Http\Controllers\Api\Patients\ClinicAppointmentController as PatientClinicAppointmentController;
 use App\Http\Controllers\Api\Clinics\ClinicAppointmentController as ClinicOwnerAppointmentController;
+use App\Http\Controllers\Api\Clinics\ClinicAppointmentExaminationController;
 use App\Http\Controllers\Api\Patients\PatientWalletController;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +43,8 @@ Route::middleware('auth:sanctum')->prefix('clinics')->group(function () {
     Route::get('appointments/{appointment_id}', [ClinicOwnerAppointmentController::class, 'show']);
     Route::patch('appointments/{appointment_id}/status', [ClinicOwnerAppointmentController::class, 'updateStatus']);
     Route::patch('appointments/{appointment_id}/medical-info', [ClinicOwnerAppointmentController::class, 'updateMedicalInfo']);
+        Route::get('appointments/{appointment_id}/examinations', [ClinicAppointmentExaminationController::class, 'index']);
+    Route::post('appointments/{appointment_id}/examinations', [ClinicAppointmentExaminationController::class, 'store']);
 
 
 });
