@@ -110,8 +110,6 @@ class ClinicAppointmentController extends Controller
                     ? $appointment->appointment_time
                     : $appointment->appointment_time->format('H:i'),
                 'booking_fee' => $appointment->booking_fee,
-                'wallet_id' => $appointment->wallet_id,
-                'wallet_name' => $appointment->wallet->name ?? null,
                 'type' => $appointment->type,
                 'status' => $appointment->status,
                 'rejection_reason' => $appointment->rejection_reason,
