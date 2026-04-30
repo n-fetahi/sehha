@@ -57,7 +57,6 @@ class SecretaryController extends Controller
                 'name'        => $secretary->name,
                 'phone'       => $secretary->phone,
                 'gender'      => $secretary->gender,
-                'password'    => '********',
                 'user_status' => $secretary->user_status,
             ],
         ], 200);
