@@ -96,6 +96,9 @@ class ClinicAppointmentController extends Controller
             ->filter()
             ->values();
 
+        $examinations = $examinations->isEmpty() ? null : $examinations;
+
+
         return response()->json([
             'status' => 200,
             'data' => [
@@ -112,6 +115,7 @@ class ClinicAppointmentController extends Controller
                 'type' => $appointment->type,
                 'status' => $appointment->status,
                 'rejection_reason' => $appointment->rejection_reason,
+                'cancelled_reason' => $appointment->cancelled_reason,
                 'diagnosis' => $appointment->diagnosis,
                 'medications' => $appointment->medications,
                 'result' => $result,
@@ -123,76 +127,89 @@ class ClinicAppointmentController extends Controller
         ], 200);
     }
 
-        /**
-     * PATCH /api/clinics/appointments/{appointment_id}/status
-     * تحديث حالة الحجز (status) وسبب الرفض الاختياري.
-     */
-    public function updateStatus(Request $request, int $appointment_id): JsonResponse
-    {
-        $user = $request->user();
-        $clinic = $user->ownedClinic;
+    /**
+ * PATCH /api/clinics/appointments/{appointment_id}/status
+ * تحديث حالة الحجز مع سبب الرفض أو سبب الإلغاء حسب الحالة.
+ */
+public function updateStatus(Request $request, int $appointment_id): JsonResponse
+{
+    $user = $request->user();
+    $clinic = $user->ownedClinic;
 
-        if (!$clinic) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'العيادة غير موجودة'
-            ], 400);
-        }
-
-        $appointment = $clinic->appointments()->where('id', $appointment_id)->first();
-        if (!$appointment) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'الحجز غير موجود'
-            ], 400);
-        }
-
-        // التحقق من المدخلات
-        $validator = Validator::make($request->all(), [
-            'status' => [
-                'required',
-                'string',
-                'in:' . implode(',', [
-                    ClinicAppointment::STATUS_PENDING_BOOKING,
-                    ClinicAppointment::STATUS_PENDING,
-                    ClinicAppointment::STATUS_APPROVED,
-                    ClinicAppointment::STATUS_REJECTED,
-                    ClinicAppointment::STATUS_COMPLETED,
-                    ClinicAppointment::STATUS_WAITING,
-                    ClinicAppointment::STATUS_NO_SHOW,
-                    ClinicAppointment::STATUS_CANCELLED,
-                ])
-            ],
-            'rejection_reason' => ['nullable', 'string', 'max:500'],
-        ], [
-            'status.required' => 'حالة الحجز مطلوبة',
-            'status.in' => 'حالة الحجز غير صالحة',
-            'rejection_reason.max' => 'سبب الرفض يجب ألا يتجاوز 500 حرف',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'البيانات المرسلة غير صالحة',
-                'errors' => $validator->errors(),
-            ], 400);
-        }
-
-        // تحديث الحالة
-        $updateData = ['status' => $request->status];
-
-        // نُحدِّث سبب الرفض فقط إذا أُرسل في الطلب (حتى لو كان فارغاً)
-        if ($request->has('rejection_reason')) {
-            $updateData['rejection_reason'] = $request->rejection_reason;
-        }
-
-        $appointment->update($updateData);
-
+    if (!$clinic) {
         return response()->json([
-            'status' => 200,
-            'message' => 'تم تحديث حالة الحجز بنجاح',
-        ], 200);
+            'status' => 400,
+            'message' => 'العيادة غير موجودة'
+        ], 400);
     }
+
+    $appointment = $clinic->appointments()->where('id', $appointment_id)->first();
+    if (!$appointment) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'الحجز غير موجود'
+        ], 400);
+    }
+
+    // التحقق من المدخلات
+    $validator = Validator::make($request->all(), [
+        'status' => [
+            'required',
+            'string',
+            'in:' . implode(',', [
+                ClinicAppointment::STATUS_PENDING_BOOKING,
+                ClinicAppointment::STATUS_PENDING,
+                ClinicAppointment::STATUS_APPROVED,
+                ClinicAppointment::STATUS_REJECTED,
+                ClinicAppointment::STATUS_COMPLETED,
+                ClinicAppointment::STATUS_WAITING,
+                ClinicAppointment::STATUS_NO_SHOW,
+                ClinicAppointment::STATUS_CANCELLED,
+            ])
+        ],
+        'rejection_reason' => ['nullable', 'string', 'max:500'],
+        'cancelled_reason'  => ['nullable', 'string', 'max:500'],
+    ], [
+        'status.required'        => 'حالة الحجز مطلوبة',
+        'status.in'              => 'حالة الحجز غير صالحة',
+        'rejection_reason.max'   => 'سبب الرفض يجب ألا يتجاوز 500 حرف',
+        'cancelled_reason.max'   => 'سبب الإلغاء يجب ألا يتجاوز 500 حرف',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'البيانات المرسلة غير صالحة',
+            'errors' => $validator->errors(),
+        ], 400);
+    }
+
+    // تحضير البيانات للتحديث
+    $updateData = ['status' => $request->status];
+
+    // معالجة rejection_reason: يُؤخذ فقط إن كانت الحالة rejected، وإلا يُمسح
+    if ($request->status === ClinicAppointment::STATUS_REJECTED) {
+        $updateData['rejection_reason'] = $request->rejection_reason;
+        $updateData['cancelled_reason'] = null;  // نمسح سبب الإلغاء
+    }
+    // معالجة cancelled_reason: يُؤخذ فقط إن كانت الحالة cancelled، وإلا يُمسح
+    elseif ($request->status === ClinicAppointment::STATUS_CANCELLED) {
+        $updateData['cancelled_reason'] = $request->cancelled_reason;
+        $updateData['rejection_reason'] = null;  // نمسح سبب الرفض
+    }
+    // أي حالة أخرى: نمسح كلا الحقلين
+    else {
+        $updateData['rejection_reason'] = null;
+        $updateData['cancelled_reason'] = null;
+    }
+
+    $appointment->update($updateData);
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'تم تحديث حالة الحجز بنجاح',
+    ], 200);
+}
 
     /**
      * PATCH /api/clinics/appointments/{appointment_id}/medical-info

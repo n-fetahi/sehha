@@ -57,7 +57,8 @@ class ClinicAppointment extends Model
         'follow_up_period',
         'diagnosis',
         'medications',
-        'rejection_reason'
+        'rejection_reason',
+        'cancelled_reason'
 
     ];
 

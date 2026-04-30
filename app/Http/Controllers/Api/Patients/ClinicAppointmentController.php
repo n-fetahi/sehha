@@ -66,9 +66,9 @@ public function show(Request $request, int $appointment_id): JsonResponse
         ->with([
             'clinic:id,name',
             'wallet:id,name',
-            'examinationRequests:id,clinic_appointment_id,examination_item_id',
+            'examinationRequests:id,clinic_appointment_id,lab_appointment_id,examination_item_id', // أضفنا lab_appointment_id
             'examinationRequests.examinationItem:id,name',
-            'nextAppointment:id,previous_appointment_id'  // علاقة nextAppointment تجلب حجز المتابعة
+            'nextAppointment:id,previous_appointment_id'
         ])
         ->where('id', $appointment_id)
         ->first();
@@ -85,6 +85,11 @@ public function show(Request $request, int $appointment_id): JsonResponse
         ->pluck('examinationItem.name')
         ->filter()   // لاستبعاد القيم null (إذا كان examinationItem غير موجود)
         ->values();  // لإعادة ترتيب المفاتيح من 0
+
+    $examinations = $examinations->isEmpty() ? null : $examinations;
+
+
+    $labAppointmentId = $appointment->examinationRequests->first()?->lab_appointment_id;
 
     // تجهيز الاستجابة
     return response()->json([
@@ -103,8 +108,10 @@ public function show(Request $request, int $appointment_id): JsonResponse
             'type' => $appointment->type,
             'status' => $appointment->status,
             'rejection_reason' => $appointment->rejection_reason,
+            'cancelled_reason' => $appointment->cancelled_reason,
             'diagnosis' => $appointment->diagnosis,
             'medications' => $appointment->medications,
+            'lab_appointment_id' => $labAppointmentId,
             'examinations' => $examinations,
             'next_appointment_id' => $appointment->nextAppointment->id ?? null,
             'follow_up_date' => $appointment->follow_up_date?->toDateString(),
@@ -329,4 +336,42 @@ public function getAvailableTimes(Request $request, $clinic_id): JsonResponse
         'data' => $availableTimes,
     ]);
 }
+
+
+    /**
+     * PATCH /api/patients/clinic-appointments/{appointment_id}
+     * إلغاء حجز عيادة من قبل المريض (تحديث الحالة إلى cancelled).
+     */
+    public function cancel(Request $request, int $appointment_id): JsonResponse
+    {
+        $user = $request->user();
+        $patient = $user->patient;
+
+        if (!$patient) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'المريض غير موجود'
+            ], 400);
+        }
+
+        $appointment = $patient->clinicAppointments()
+            ->where('id', $appointment_id)
+            ->first();
+
+        if (!$appointment) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'الحجز غير موجود أو لا يخص هذا المريض'
+            ], 400);
+        }
+
+        $appointment->update([
+            'status' => 'cancelled',
+        ]);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'تم إلغاء الحجز بنجاح',
+        ], 200);
+    }
 }
