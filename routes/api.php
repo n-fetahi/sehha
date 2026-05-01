@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Clinics\ClinicAppointmentExaminationController;
 use App\Http\Controllers\Api\Clinics\SecretaryController;
 use App\Http\Controllers\Api\Patients\PatientClinicExaminationLabController;
 use App\Http\Controllers\Api\Patients\PatientWalletController;
+use App\Http\Controllers\Api\Global\AppNotificationController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -91,6 +92,12 @@ Route::middleware('auth:sanctum')->prefix('labs')->group(function () {
 Route::get('/labs',[LabController::class, 'index']);
 Route::get('/labs/{lab_id}',[LabController::class, 'show']);
 Route::get('/clinics/{clinic_id}',[ClinicController::class, 'show']);
+
+// =========================================================
+// 🔔 الإشعارات
+// =========================================================
+Route::get('/notifications', [AppNotificationController::class, 'index']);
+Route::patch('/notifications/{notification_id}/delivered', [AppNotificationController::class, 'markDelivered']);
 
 
 

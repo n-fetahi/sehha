@@ -14,6 +14,7 @@ use App\Http\Requests\StoreClinicRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Models\AppNotification;
 
 class AuthController extends Controller
 {
@@ -63,6 +64,13 @@ class AuthController extends Controller
         Patient::create([
             'user_id' => $user->id,
             'birth_date' => $request->birth_date,
+        ]);
+
+        // ✅ إنشاء إشعار برمز التحقق
+        AppNotification::create([
+            'title'   => 'رمز التأكيد',
+            'content' => 'رمز التحقق الخاص بك هو ' . $verificationCode,
+            'user_id' => $user->id,
         ]);
 
         // =========================
@@ -129,6 +137,13 @@ public function registerLab(LabRegisterRequest $request)
         'profile_picture' => $profilePicturePath,
     ]);
 
+    // ✅ إنشاء إشعار برمز التحقق
+    AppNotification::create([
+        'title'   => 'رمز التأكيد',
+        'content' => 'رمز التحقق الخاص بك هو ' . $verificationCode,
+        'user_id' => $user->id,
+    ]);
+
     return response()->json([
         'status' => 200,
         'user_id' => $user->id,
@@ -174,10 +189,16 @@ public function registerLab(LabRegisterRequest $request)
         'profile_picture' => $profilePicturePath,
     ]);
 
+    // ✅ إنشاء إشعار برمز التحقق
+    AppNotification::create([
+        'title'   => 'رمز التأكيد',
+        'content' => 'رمز التحقق الخاص بك هو ' . $verificationCode,
+        'user_id' => $user->id,
+    ]);
+
     return response()->json([
         'status' => 200,
         'user_id' => $user->id,
-
     ]);
 }
 
@@ -251,9 +272,18 @@ public function registerLab(LabRegisterRequest $request)
 
         $user = User::find($request->user_id);
         
+        $newCode = (string) rand(1000, 9999);
+
         $user->update([
-            'verification_code' => (string) rand(1000, 9999),
+            'verification_code' => $newCode,
             'verification_code_expires_at' => now()->addMinutes(3),
+        ]);
+
+        // ✅ إنشاء إشعار برمز التحقق الجديد
+        AppNotification::create([
+            'title'   => 'رمز التأكيد',
+            'content' => 'رمز التحقق الخاص بك هو ' . $newCode,
+            'user_id' => $user->id,
         ]);
 
         return response()->json([
