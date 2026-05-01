@@ -24,6 +24,10 @@ Route::post('/labs/register', [AuthController::class, 'registerLab']);
 
 Route::post('/clinics/register', [AuthController::class, 'registerClinic']);
 
+Route::post('/verify-code', [AuthController::class, 'verifyRegistrationCode']);
+
+Route::post('/resend-verify-code', [AuthController::class, 'resendVerificationCode']);
+
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/medical-departments', [MedicalDepartmentsController::class, 'show']);

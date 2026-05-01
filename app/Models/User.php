@@ -18,6 +18,8 @@ class User extends Authenticatable implements FilamentUser // أضف implements 
         'phone',
         'email',
         'password',
+        'verification_code',
+        'verification_code_expires_at',
         'user_type',
         'gender',  // الحقل الجديد
         'user_status'
@@ -26,12 +28,14 @@ class User extends Authenticatable implements FilamentUser // أضف implements 
     protected $hidden = [
         'password',
         'remember_token',
+        'verification_code',
     ];
 
     protected function casts(): array
     {
         return [
             'password' => 'hashed',
+            'verification_code_expires_at' => 'datetime',
         ];
     }
 

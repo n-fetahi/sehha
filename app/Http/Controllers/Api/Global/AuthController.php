@@ -46,13 +46,15 @@ class AuthController extends Controller
         // =========================
         // ✅ إنشاء المستخدم
         // =========================
+        $verificationCode = (string) rand(1000, 9999);
         $user = User::create([
             'name' => $request->name,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'user_type' => 'patient',
             'gender' => $request->gender ?? null,
-            'user_status' => 'approved'
+            'verification_code' => $verificationCode,
+            'verification_code_expires_at' => now()->addMinutes(3),
         ]);
 
         // =========================
@@ -64,19 +66,11 @@ class AuthController extends Controller
         ]);
 
         // =========================
-        // 🔐 إنشاء توكن
-        // =========================
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        // =========================
         // ✅ الرد الناجح
         // =========================
         return response()->json([
             'status' => 200,
-            'token' => $token,
-            'name' => $user->name,
             'user_id' => $user->id,
-            'user_type' => $user->user_type
         ]);
     }
 
@@ -102,6 +96,7 @@ public function registerLab(LabRegisterRequest $request)
         ]);
     }
 
+    $verificationCode = (string) rand(1000, 9999);
     // إنشاء مستخدم جديد للمختبر
     $user = User::create([
         'name' => $request->name,
@@ -109,6 +104,8 @@ public function registerLab(LabRegisterRequest $request)
         'password' => bcrypt($request->password),
         'user_type' => 'lab',
         'gender' => $request->gender ?? null,
+        'verification_code' => $verificationCode,
+        'verification_code_expires_at' => now()->addMinutes(3),
     ]);
 
     // ✅ تخزين الملفات مباشرة بدلاً من Base64
@@ -134,7 +131,7 @@ public function registerLab(LabRegisterRequest $request)
 
     return response()->json([
         'status' => 200,
-        'message' => 'تم ارسال طلب الانضمام بنجاح وتجري عملية المراجعة من قبل الفريق المختص'
+        'user_id' => $user->id,
     ]);
 }
     // =========================================================
@@ -142,6 +139,7 @@ public function registerLab(LabRegisterRequest $request)
     // =========================================================
     public function registerClinic(StoreClinicRequest $request)
 {
+    $verificationCode = (string) rand(1000, 9999);
     // إنشاء مستخدم جديد
     $user = User::create([
         'name' => $request->name,
@@ -149,6 +147,8 @@ public function registerLab(LabRegisterRequest $request)
         'password' => Hash::make($request->password),
         'user_type' => 'clinic',
         'gender' => $request->gender ?? null,
+        'verification_code' => $verificationCode,
+        'verification_code_expires_at' => now()->addMinutes(3),
     ]);
 
     // ✅ تخزين الملفات مباشرة بدلاً من Base64
@@ -176,7 +176,8 @@ public function registerLab(LabRegisterRequest $request)
 
     return response()->json([
         'status' => 200,
-        'message' => 'تم ارسال طلب الانضمام بنجاح وتجري عملية المراجعة من قبل الفريق المختص'
+        'user_id' => $user->id,
+
     ]);
 }
 
@@ -184,7 +185,85 @@ public function registerLab(LabRegisterRequest $request)
 
 
     // =========================================================
-    // 🟢خامساً: تسجيل الدخول
+    // 🟢 رابعاً: التحقق من الرمز
+    // =========================================================
+    public function verifyRegistrationCode(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'verification_code' => 'required'
+        ]);
+
+        $user = User::find($request->user_id);
+
+        if ($user->verification_code !== $request->verification_code) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'رمز التحقق غير صحيح'
+            ], 400);
+        }
+
+        if ($user->verification_code_expires_at && $user->verification_code_expires_at < now()) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'انتهت صلاحية هذا الرمز، قم بطلب رمز جديد ثم حاول مرة اخرى'
+            ], 400);
+        }
+
+        // تفريغ رمز التحقق وتحديث حالة المستخدم
+        $updateData = [
+            'verification_code' => null,
+            'verification_code_expires_at' => null,
+        ];
+        
+        if ($user->user_type === 'patient') {
+            $updateData['user_status'] = 'approved';
+        }
+        
+        $user->update($updateData);
+
+        if ($user->user_type === 'patient') {
+            $token = $user->createToken('auth_token')->plainTextToken;
+            return response()->json([
+                'status' => 200,
+                'token' => $token,
+                'name' => $user->name,
+                'user_id' => $user->id,
+                'user_type' => $user->user_type
+            ]);
+        } else {
+            // Lab or Clinic
+            return response()->json([
+                'status' => 200,
+                'message' => 'تم ارسال طلب الانضمام بنجاح وتجري عملية المراجعة من قبل الفريق المختص'
+            ]);
+        }
+    }
+
+    // =========================================================
+    // 🟢 خامساً: إعادة إرسال الرمز
+    // =========================================================
+    public function resendVerificationCode(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id'
+        ]);
+
+        $user = User::find($request->user_id);
+        
+        $user->update([
+            'verification_code' => (string) rand(1000, 9999),
+            'verification_code_expires_at' => now()->addMinutes(3),
+        ]);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'تمت العملية بنجاح'
+        ]);
+    }
+
+    // =========================================================
+    // 🟢 سادساً: تسجيل الدخول
     // =========================================================
     public function login(Request $request)
     {
