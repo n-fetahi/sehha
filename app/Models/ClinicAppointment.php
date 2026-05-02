@@ -53,6 +53,7 @@ class ClinicAppointment extends Model
         'type',
         'appointment_date',
         'appointment_time',
+        'booking_fee',
         'follow_up_date',
         'follow_up_period',
         'diagnosis',
@@ -199,11 +200,17 @@ class ClinicAppointment extends Model
     /**
      * حساب وقت انتهاء الموعد بناءً على نوع الحجز ومدة الجلسة.
      */
-    public function getEndTimeAttribute(): string
+    public function getEndTimeAttribute(): ?string
     {
+        if (!$this->appointment_time) {
+            return null;
+        }
+
         $schedule = $this->clinic->schedule;
         if (!$schedule) {
-            return $this->appointment_time;
+            return is_string($this->appointment_time)
+                ? $this->appointment_time
+                : $this->appointment_time->format('H:i');
         }
 
         $duration = $this->type === self::TYPE_CONSULTATION

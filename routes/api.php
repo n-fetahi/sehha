@@ -45,13 +45,14 @@ Route::middleware('auth:sanctum')->prefix('clinics')->group(function () {
 
     Route::get('/schedule', [ClinicScheduleController::class, 'show']);
     Route::post('/schedule', [ClinicScheduleController::class, 'store']);
-    Route::get('/follow-up/available-dates', [ClinicScheduleController::class, 'getFollowUpAvailableDates']);
     Route::get('appointments', [ClinicOwnerAppointmentController::class, 'index']);
     Route::get('appointments/{appointment_id}', [ClinicOwnerAppointmentController::class, 'show']);
     Route::patch('appointments/{appointment_id}/status', [ClinicOwnerAppointmentController::class, 'updateStatus']);
     Route::patch('appointments/{appointment_id}/medical-info', [ClinicOwnerAppointmentController::class, 'updateMedicalInfo']);
         Route::get('appointments/{appointment_id}/examinations', [ClinicAppointmentExaminationController::class, 'index']);
     Route::post('appointments/{appointment_id}/examinations', [ClinicAppointmentExaminationController::class, 'store']);
+    Route::get('/appointments/{appointment_id}/follow-up', [ClinicScheduleController::class, 'getAppointmentFollowUp']);
+    Route::post('/appointments/{appointment_id}/follow-up', [ClinicScheduleController::class, 'storeFollowUp']);
     Route::post('/secretary', [SecretaryController::class, 'storeOrUpdate']);
     Route::get('/secretary', [SecretaryController::class, 'show']);
 
@@ -98,7 +99,6 @@ Route::get('/clinics/{clinic_id}',[ClinicController::class, 'show']);
 // =========================================================
 Route::get('/notifications', [AppNotificationController::class, 'index']);
 Route::patch('/notifications/{notification_id}/delivered', [AppNotificationController::class, 'markDelivered']);
-
 
 
 

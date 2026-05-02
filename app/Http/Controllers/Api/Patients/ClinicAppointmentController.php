@@ -98,10 +98,12 @@ public function show(Request $request, int $appointment_id): JsonResponse
             'id' => $appointment->id,
             'clinic_id' => $appointment->clinic_id,
             'clinic_name' => $appointment->clinic->name ?? null,
-            'appointment_date' => $appointment->appointment_date->toDateString(),
-            'appointment_time' => is_string($appointment->appointment_time)
-                ? $appointment->appointment_time
-                : $appointment->appointment_time->format('H:i'),
+            'appointment_date' => $appointment->appointment_date?->toDateString(),
+            'appointment_time' => $appointment->appointment_time
+                ? (is_string($appointment->appointment_time)
+                    ? $appointment->appointment_time
+                    : $appointment->appointment_time->format('H:i'))
+                : null,
             'booking_fee' => $appointment->booking_fee,
             'wallet_id' => $appointment->wallet_id,
             'wallet_name' => $appointment->wallet->name ?? null,

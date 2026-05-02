@@ -105,10 +105,12 @@ class ClinicAppointmentController extends Controller
                 'id' => $appointment->id,
                 'patient_id' => $appointment->patient_id,
                 'patient_name' => $appointment->patient->user->name ?? null,
-                'appointment_date' => $appointment->appointment_date->toDateString(),
-                'appointment_time' => is_string($appointment->appointment_time)
-                    ? $appointment->appointment_time
-                    : $appointment->appointment_time->format('H:i'),
+                'appointment_date' => $appointment->appointment_date?->toDateString(),
+                'appointment_time' => $appointment->appointment_time
+                    ? (is_string($appointment->appointment_time)
+                        ? $appointment->appointment_time
+                        : $appointment->appointment_time->format('H:i'))
+                    : null,
                 'booking_fee' => $appointment->booking_fee,
                 'type' => $appointment->type,
                 'status' => $appointment->status,
