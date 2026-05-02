@@ -51,12 +51,14 @@ public function index(Request $request, int $appointment_id): JsonResponse
         ], 200);
     }
 
-    $requiredCount = count($examinationItemIds);
+    $requiredCount = $examinationItemIds->count();
 
-    $labs = Lab::whereHas('examinationItems', function ($q) use ($examinationItemIds, $requiredCount) {
-            $q->whereIn('examination_item_id', $examinationItemIds)
-              ->groupBy('lab_id')
-              ->havingRaw('COUNT(DISTINCT examination_item_id) = ?', [$requiredCount]);
+    $labs = Lab::whereIn('id', function ($query) use ($examinationItemIds, $requiredCount) {
+            $query->select('lab_id')
+                ->from('lab_examination_items')
+                ->whereIn('examination_item_id', $examinationItemIds)
+                ->groupBy('lab_id')
+                ->havingRaw('COUNT(DISTINCT examination_item_id) = ?', [$requiredCount]);
         })
         ->select('id', 'name', 'location', 'rating')
         ->get();
