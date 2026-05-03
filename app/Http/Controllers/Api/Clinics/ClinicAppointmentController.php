@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Clinics;
 
+use App\Http\Controllers\Api\Clinics\Concerns\ResolvesAuthenticatedClinic;
 use App\Http\Controllers\Controller;
 use App\Models\ClinicAppointment;
 use Illuminate\Http\JsonResponse;
@@ -12,14 +13,15 @@ use Illuminate\Support\Facades\Storage;
 
 class ClinicAppointmentController extends Controller
 {
+    use ResolvesAuthenticatedClinic;
+
     /**
      * GET /api/clinics/appointments
      * استعراض جميع حجوزات العيادة التي يملكها المستخدم المسجل دخوله.
      */
     public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $clinic = $user->ownedClinic;  // العلاقة في موديل User: ownedClinic
+        $clinic = $this->resolveAuthenticatedClinic($request);
 
         if (!$clinic) {
             return response()->json([
@@ -53,8 +55,7 @@ class ClinicAppointmentController extends Controller
      */
     public function show(Request $request, int $appointment_id): JsonResponse
     {
-        $user = $request->user();
-        $clinic = $user->ownedClinic;
+        $clinic = $this->resolveAuthenticatedClinic($request);
 
         if (!$clinic) {
             return response()->json([
@@ -133,8 +134,7 @@ class ClinicAppointmentController extends Controller
  */
 public function updateStatus(Request $request, int $appointment_id): JsonResponse
 {
-    $user = $request->user();
-    $clinic = $user->ownedClinic;
+    $clinic = $this->resolveAuthenticatedClinic($request);
 
     if (!$clinic) {
         return response()->json([
@@ -217,8 +217,7 @@ public function updateStatus(Request $request, int $appointment_id): JsonRespons
      */
     public function updateMedicalInfo(Request $request, int $appointment_id): JsonResponse
     {
-        $user = $request->user();
-        $clinic = $user->ownedClinic;
+        $clinic = $this->resolveAuthenticatedClinic($request);
 
         if (!$clinic) {
             return response()->json([

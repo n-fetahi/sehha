@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Clinics;
 
+use App\Http\Controllers\Api\Clinics\Concerns\ResolvesAuthenticatedClinic;
 use App\Http\Controllers\Concerns\FormatsTime;
 use App\Http\Controllers\Controller;
 use App\Models\ClinicAppointment;
@@ -15,6 +16,7 @@ use Carbon\Carbon;
 class ClinicScheduleController extends Controller
 {
     use FormatsTime;
+    use ResolvesAuthenticatedClinic;
 
     /**
      * GET /api/clinics/schedule
@@ -22,9 +24,7 @@ class ClinicScheduleController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        $user = $request->user();
-
-        $clinic = $user->ownedClinic;
+        $clinic = $this->resolveAuthenticatedClinic($request);
 
         if (!$clinic) {
             return response()->json([
@@ -68,9 +68,7 @@ class ClinicScheduleController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $user = $request->user();
-
-        $clinic = $user->ownedClinic;
+        $clinic = $this->resolveAuthenticatedClinic($request);
 
         if (!$clinic) {
             return response()->json([
@@ -139,8 +137,7 @@ class ClinicScheduleController extends Controller
  */
 public function getFollowUpAvailableDates(Request $request): JsonResponse
 {
-    $user = $request->user();
-    $clinic = $user->ownedClinic;
+    $clinic = $this->resolveAuthenticatedClinic($request);
 
     if (!$clinic) {
         return response()->json(['status' => 400, 'message' => 'لا توجد عيادة مرتبطة بهذا المستخدم'], 400);
@@ -187,8 +184,7 @@ public function getFollowUpAvailableDates(Request $request): JsonResponse
 
     public function getAppointmentFollowUp(Request $request, int $appointment_id): JsonResponse
     {
-        $user = $request->user();
-        $clinic = $user->ownedClinic;
+        $clinic = $this->resolveAuthenticatedClinic($request);
 
         if (!$clinic) {
             return response()->json([
@@ -270,8 +266,7 @@ public function getFollowUpAvailableDates(Request $request): JsonResponse
 
     public function storeFollowUp(Request $request, int $appointment_id): JsonResponse
     {
-        $user = $request->user();
-        $clinic = $user->ownedClinic;
+        $clinic = $this->resolveAuthenticatedClinic($request);
 
         if (!$clinic) {
             return response()->json([

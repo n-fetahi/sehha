@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Clinics;
 
+use App\Http\Controllers\Api\Clinics\Concerns\ResolvesAuthenticatedClinic;
 use App\Http\Controllers\Controller;
 use App\Models\ExaminationRequest;
 use App\Models\ExaminationType;
@@ -10,14 +11,15 @@ use Illuminate\Http\Request;
 
 class ClinicAppointmentExaminationController extends Controller
 {
+    use ResolvesAuthenticatedClinic;
+
     /**
      * GET /api/clinics/appointments/{appointment_id}/examinations
      * جلب أنواع الفحوصات مع عناصرها مع بيان المحدد منها مسبقاً للحجز.
      */
     public function index(Request $request, int $appointment_id): JsonResponse
     {
-        $user = $request->user();
-        $clinic = $user->ownedClinic;
+        $clinic = $this->resolveAuthenticatedClinic($request);
 
         if (!$clinic) {
             return response()->json([
@@ -68,8 +70,7 @@ class ClinicAppointmentExaminationController extends Controller
      */
     public function store(Request $request, int $appointment_id): JsonResponse
     {
-        $user = $request->user();
-        $clinic = $user->ownedClinic;
+        $clinic = $this->resolveAuthenticatedClinic($request);
 
         if (!$clinic) {
             return response()->json([
