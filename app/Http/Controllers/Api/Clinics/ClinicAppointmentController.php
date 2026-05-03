@@ -120,7 +120,6 @@ class ClinicAppointmentController extends Controller
                 'medications' => $appointment->medications,
                 'result' => $result,
                 'examinations' => $examinations,
-                'next_appointment_id' => $appointment->nextAppointment->id ?? null,
                 'follow_up_date' => $appointment->follow_up_date?->toDateString(),
                 'follow_up_period' => $appointment->follow_up_period,
             ]
