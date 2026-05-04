@@ -537,6 +537,7 @@ public function getAvailableTimes(Request $request, $clinic_id): JsonResponse
         $appointment->update([
             'appointment_date' => $date->toDateString(),
             'appointment_time' => $time,
+            'status' => ClinicAppointment::STATUS_PENDING,
         ]);
 
         return response()->json([
