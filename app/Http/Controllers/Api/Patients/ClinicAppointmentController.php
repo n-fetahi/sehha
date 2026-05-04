@@ -284,8 +284,15 @@ public function getFollowUpAvailableDates(Request $request, int $appointment_id)
     }
 
     $schedule = $appointment->clinic?->schedule;
-    if (!$schedule || !$schedule->is_available) {
+    if (!$schedule) {
         return response()->json(['status' => 200, 'data' => []]);
+    }
+
+    if (!$schedule->is_available) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'عذراً عيادة ' . ($appointment->clinic?->name ?? '') . ' قامت باقفال استقبال الحجوزات'
+        ], 400);
     }
 
     $workingWeekdayIds = $schedule->weekdays->pluck('id')->toArray();
