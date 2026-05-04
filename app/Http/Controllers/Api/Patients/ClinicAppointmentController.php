@@ -252,6 +252,73 @@ public function getAvailableDates(Request $request, $clinic_id): JsonResponse
 }
 
 
+public function getFollowUpAvailableDates(Request $request, int $appointment_id): JsonResponse
+{
+    $user = $request->user();
+    $patient = $user->patient;
+
+    if (!$patient) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'Patient not found'
+        ], 400);
+    }
+
+    $appointment = $patient->clinicAppointments()
+        ->with('clinic.schedule.weekdays')
+        ->where('id', $appointment_id)
+        ->first();
+
+    if (!$appointment) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'Appointment not found or does not belong to this patient'
+        ], 400);
+    }
+
+    if (!$appointment->follow_up_date || !$appointment->follow_up_period) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'Follow-up date or period is not set for this appointment'
+        ], 400);
+    }
+
+    $schedule = $appointment->clinic?->schedule;
+    if (!$schedule || !$schedule->is_available) {
+        return response()->json(['status' => 200, 'data' => []]);
+    }
+
+    $workingWeekdayIds = $schedule->weekdays->pluck('id')->toArray();
+    if (empty($workingWeekdayIds)) {
+        return response()->json(['status' => 200, 'data' => []]);
+    }
+
+    $map = [1 => 6, 2 => 0, 3 => 1, 4 => 2, 5 => 3, 6 => 4, 7 => 5];
+    $carbonDays = array_values(array_intersect_key($map, array_flip($workingWeekdayIds)));
+    if (empty($carbonDays)) {
+        return response()->json(['status' => 200, 'data' => []]);
+    }
+
+    $startDate = $appointment->follow_up_date->copy()->startOfDay();
+    $availableDates = [];
+
+    for ($i = 0; $i < (int) $appointment->follow_up_period; $i++) {
+        $date = $startDate->copy()->addDays($i);
+
+        if (!in_array($date->dayOfWeek, $carbonDays, true)) {
+            continue;
+        }
+
+        $availableDates[] = $date->toDateString();
+    }
+
+    return response()->json([
+        'status' => 200,
+        'data' => $availableDates
+    ]);
+}
+
+
 /**
  * GET /api/clinics/{clinic_id}/available-times?date=YYYY-MM-DD
  */
@@ -341,9 +408,145 @@ public function getAvailableTimes(Request $request, $clinic_id): JsonResponse
 
 
     /**
-     * PATCH /api/patients/clinic-appointments/{appointment_id}
+     * PATCH /api/patients/clinic-appointments/{appointment_id}/update
      * إلغاء حجز عيادة من قبل المريض (تحديث الحالة إلى cancelled).
      */
+    public function update(Request $request, int $appointment_id): JsonResponse
+    {
+        $user = $request->user();
+        $patient = $user->patient;
+
+        if (!$patient) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Ø§Ù„Ù…Ø±ÙŠØ¶ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯'
+            ], 400);
+        }
+
+        $appointment = $patient->clinicAppointments()
+            ->where('id', $appointment_id)
+            ->first();
+
+        if (!$appointment) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Ø§Ù„Ø­Ø¬Ø² ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯ Ø£Ùˆ Ù„Ø§ ÙŠØ®Øµ Ù‡Ø°Ø§ Ø§Ù„Ù…Ø±ÙŠØ¶'
+            ], 400);
+        }
+
+        if (in_array($appointment->status, [
+            ClinicAppointment::STATUS_CANCELLED,
+            ClinicAppointment::STATUS_COMPLETED,
+            ClinicAppointment::STATUS_NO_SHOW,
+            ClinicAppointment::STATUS_REJECTED,
+        ], true)) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Ù„Ø§ ÙŠÙ…ÙƒÙ† ØªØ¹Ø¯ÙŠÙ„ Ù‡Ø°Ø§ Ø§Ù„Ø­Ø¬Ø² Ø¨Ø­Ø§Ù„ØªÙ‡ Ø§Ù„Ø­Ø§Ù„ÙŠØ©'
+            ], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'appointment_date' => ['required', 'date', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'appointment_time' => ['required', 'date_format:H:i'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø±Ø³Ù„Ø© ØºÙŠØ± ØµØ§Ù„Ø­Ø©',
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+
+        $date = Carbon::createFromFormat('Y-m-d', $request->appointment_date)->startOfDay();
+        $time = $request->appointment_time;
+        $clinic = Clinic::with('schedule.weekdays')->find($appointment->clinic_id);
+        $schedule = $clinic?->schedule;
+
+        if (!$schedule || !$schedule->is_available) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Ø§Ù„Ø¹ÙŠØ§Ø¯Ø© ØºÙŠØ± Ù…ØªØ§Ø­Ø© Ù„Ù„Ø­Ø¬Ø²'
+            ], 400);
+        }
+
+        $workingWeekdayIds = $schedule->weekdays->pluck('id')->toArray();
+        $map = [1 => 6, 2 => 0, 3 => 1, 4 => 2, 5 => 3, 6 => 4, 7 => 5];
+        $carbonDays = array_values(array_intersect_key($map, array_flip($workingWeekdayIds)));
+
+        if (!in_array($date->dayOfWeek, $carbonDays, true)) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Ø§Ù„ØªØ§Ø±ÙŠØ® Ø§Ù„Ù…Ø­Ø¯Ø¯ Ù„ÙŠØ³ Ù…Ù† Ø£ÙŠØ§Ù… Ø¹Ù…Ù„ Ø§Ù„Ø¹ÙŠØ§Ø¯Ø©'
+            ], 400);
+        }
+
+        if ($date->isToday() && $time < Carbon::now()->format('H:i')) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'ÙˆÙ‚Øª Ø§Ù„Ù…ÙˆØ¹Ø¯ ÙŠØ¬Ø¨ Ø£Ù† ÙŠÙƒÙˆÙ† ÙÙŠ Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„'
+            ], 400);
+        }
+
+        $start = Carbon::parse($schedule->start_time);
+        $end = Carbon::parse($schedule->end_time);
+        $duration = (int) $schedule->session_duration;
+        $availableTimes = [];
+        $current = $start->copy();
+
+        while ($duration > 0 && $current->copy()->addMinutes($duration)->lte($end)) {
+            $availableTimes[] = $current->format('H:i');
+            $current->addMinutes($duration);
+        }
+
+        if (!in_array($time, $availableTimes, true)) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'ÙˆÙ‚Øª Ø§Ù„Ù…ÙˆØ¹Ø¯ ØºÙŠØ± Ù…ØªØ§Ø­ ÙÙŠ Ø¬Ø¯ÙˆÙ„ Ø§Ù„Ø¹ÙŠØ§Ø¯Ø©'
+            ], 400);
+        }
+
+        $isBooked = ClinicAppointment::query()
+            ->where('clinic_id', $appointment->clinic_id)
+            ->where('id', '!=', $appointment->id)
+            ->whereDate('appointment_date', $date->toDateString())
+            ->whereTime('appointment_time', $time)
+            ->whereIn('status', [
+                ClinicAppointment::STATUS_PENDING,
+                ClinicAppointment::STATUS_APPROVED,
+                ClinicAppointment::STATUS_COMPLETED,
+                ClinicAppointment::STATUS_WAITING,
+            ])
+            ->exists();
+
+        if ($isBooked) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Ù‡Ø°Ø§ Ø§Ù„ÙˆÙ‚Øª Ù…Ø­Ø¬ÙˆØ² Ù…Ø³Ø¨Ù‚Ø§Ù‹'
+            ], 400);
+        }
+
+        $appointment->update([
+            'appointment_date' => $date->toDateString(),
+            'appointment_time' => $time,
+        ]);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'ØªÙ… ØªØ¹Ø¯ÙŠÙ„ Ù…ÙˆØ¹Ø¯ Ø§Ù„Ø­Ø¬Ø² Ø¨Ù†Ø¬Ø§Ø­',
+            'data' => [
+                'id' => $appointment->id,
+                'appointment_date' => $appointment->appointment_date?->toDateString(),
+                'appointment_time' => $appointment->appointment_time
+                    ? (is_string($appointment->appointment_time)
+                        ? $appointment->appointment_time
+                        : $appointment->appointment_time->format('H:i'))
+                    : null,
+            ],
+        ], 200);
+    }
+
     public function cancel(Request $request, int $appointment_id): JsonResponse
     {
         $user = $request->user();

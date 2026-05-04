@@ -72,7 +72,9 @@ Route::middleware('auth:sanctum')->prefix('patients')->group(function () {
     Route::get('/{clinic_id}/available-times', [PatientClinicAppointmentController::class, 'getAvailableTimes']);
     Route::post('clinic-appointments', [PatientClinicAppointmentController::class, 'store']);
     Route::get('clinic-appointments', [PatientClinicAppointmentController::class, 'index']);
+    Route::get('clinic-appointments/{appointment_id}/available-dates', [PatientClinicAppointmentController::class, 'getFollowUpAvailableDates']);
     Route::get('clinic-appointments/{appointment_id}', [PatientClinicAppointmentController::class, 'show']);
+    Route::patch('clinic-appointments/{appointment_id}/update', [PatientClinicAppointmentController::class, 'update']);
     Route::patch('clinic-appointments/{appointment_id}', [PatientClinicAppointmentController::class, 'cancel']);
     Route::get('clinic-appointments/{appointment_id}/labs', [PatientClinicExaminationLabController::class, 'index']);
     Route::post('clinic-appointments/{appointment_id}/labs', [PatientClinicExaminationLabController::class, 'store']);
@@ -99,6 +101,4 @@ Route::get('/clinics/{clinic_id}',[ClinicController::class, 'show']);
 // =========================================================
 Route::get('/notifications', [AppNotificationController::class, 'index']);
 Route::patch('/notifications/{notification_id}/delivered', [AppNotificationController::class, 'markDelivered']);
-
-
 
