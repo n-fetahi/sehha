@@ -49,6 +49,11 @@ Route::middleware('auth:sanctum')->prefix('clinics')->group(function () {
     Route::get('/schedule', [ClinicScheduleController::class, 'show']);
     Route::post('/schedule', [ClinicScheduleController::class, 'store']);
     Route::get('appointments', [ClinicOwnerAppointmentController::class, 'index']);
+    Route::get('patients/{patient_id}/medical-record', [ClinicOwnerAppointmentController::class, 'medicalRecord'])
+        ->whereNumber('patient_id');
+    Route::get('patients/{patient_id}/medical-record/{medical_record_id}', [ClinicOwnerAppointmentController::class, 'medicalRecordShow'])
+        ->whereNumber('patient_id')
+        ->whereNumber('medical_record_id');
     Route::get('appointments/{appointment_id}', [ClinicOwnerAppointmentController::class, 'show']);
     Route::patch('appointments/{appointment_id}/status', [ClinicOwnerAppointmentController::class, 'updateStatus']);
     Route::patch('appointments/{appointment_id}/medical-info', [ClinicOwnerAppointmentController::class, 'updateMedicalInfo']);

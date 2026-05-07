@@ -48,6 +48,102 @@ class ClinicAppointmentController extends Controller
         ], 200);
     }
 
+    /**
+     * GET /api/clinics/patients/{patient_id}/medical-record
+     */
+    public function medicalRecord(Request $request, int $patient_id): JsonResponse
+    {
+        $clinic = $this->resolveAuthenticatedClinic($request);
+
+        if (!$clinic) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'العيادة غير موجودة'
+            ], 400);
+        }
+
+        $appointments = ClinicAppointment::query()
+            ->where('patient_id', $patient_id)
+            ->where('status', ClinicAppointment::STATUS_COMPLETED)
+            ->whereNotNull('diagnosis')
+            ->whereRaw("TRIM(diagnosis) <> ''")
+            ->orderByDesc('appointment_date')
+            ->get(['id', 'diagnosis', 'appointment_date']);
+
+        return response()->json([
+            'status' => 200,
+            'data' => $appointments->map(function ($appointment) {
+                return [
+                    'id' => $appointment->id,
+                    'diagnosis' => $appointment->diagnosis,
+                    'appointment_date' => $appointment->appointment_date?->toDateString(),
+                ];
+            })->values()
+        ], 200);
+    }
+
+    /**
+     * GET /api/clinics/patients/{patient_id}/medical-record/{medical_record_id}
+     */
+    public function medicalRecordShow(Request $request, int $patient_id, int $medical_record_id): JsonResponse
+    {
+        $clinic = $this->resolveAuthenticatedClinic($request);
+
+        if (!$clinic) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'العيادة غير موجودة'
+            ], 400);
+        }
+
+        $appointment = ClinicAppointment::query()
+            ->with([
+                'examinationRequests:id,clinic_appointment_id,lab_appointment_id,examination_item_id',
+                'examinationRequests.examinationItem:id,name',
+            ])
+            ->where('id', $medical_record_id)
+            ->where('patient_id', $patient_id)
+            ->where('status', ClinicAppointment::STATUS_COMPLETED)
+            ->whereNotNull('diagnosis')
+            ->whereRaw("TRIM(diagnosis) <> ''")
+            ->first();
+
+        if (!$appointment) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'السجل الطبي غير موجود'
+            ], 400);
+        }
+
+        $result = null;
+        $firstExamRequest = $appointment->examinationRequests->first();
+        if ($firstExamRequest && $firstExamRequest->lab_appointment_id) {
+            $labAppointment = LabAppointment::find($firstExamRequest->lab_appointment_id);
+            if ($labAppointment && $labAppointment->result) {
+                $result = Storage::url($labAppointment->result);
+            }
+        }
+
+        $examinations = $appointment->examinationRequests
+            ->pluck('examinationItem.name')
+            ->filter()
+            ->values();
+
+        $examinations = $examinations->isEmpty() ? null : $examinations;
+
+        return response()->json([
+            'status' => 200,
+            'data' => [
+                'id' => $appointment->id,
+                'diagnosis' => $appointment->diagnosis,
+                'appointment_date' => $appointment->appointment_date?->toDateString(),
+                'medications' => $appointment->medications,
+                'examinations' => $examinations,
+                'result' => $result,
+            ]
+        ], 200);
+    }
+
 
     /**
      * GET /api/clinics/appointments/{appointment_id}
