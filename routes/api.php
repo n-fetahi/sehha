@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Global\ClinicController;
 use App\Http\Controllers\Api\Global\LabController;
 use App\Http\Controllers\Api\Global\MedicalDepartmentsController;
 use App\Http\Controllers\Api\Global\HealthContentController;
+use App\Http\Controllers\Api\Global\ProviderStatusController;
 use App\Http\Controllers\Api\Labs\LabScheduleController;
 use App\Http\Controllers\Api\Patients\LabAppointmentController as PatientLabAppointmentController;
 use App\Http\Controllers\Api\Labs\LabAppointmentController as LabOwnerAppointmentController;
@@ -31,6 +32,9 @@ Route::post('/verify-code', [AuthController::class, 'verifyRegistrationCode']);
 Route::post('/resend-verify-code', [AuthController::class, 'resendVerificationCode']);
 
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::post('/provider/status', [ProviderStatusController::class, 'show']);
+Route::post('/provider/documents/resubmit', [ProviderStatusController::class, 'resubmitDocuments']);
 
 Route::get('/medical-departments', [MedicalDepartmentsController::class, 'show']);
 
