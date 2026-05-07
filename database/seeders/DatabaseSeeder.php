@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             MedicalDepartmentSeeder::class,
             WeekdaySeeder::class,
             ExaminationSeeder::class,
-            WalletSeeder::class
+            WalletSeeder::class,
+            HealthContentSeeder::class,
         ]);
 
     }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Global\AuthController;
 use App\Http\Controllers\Api\Global\ClinicController;
 use App\Http\Controllers\Api\Global\LabController;
 use App\Http\Controllers\Api\Global\MedicalDepartmentsController;
+use App\Http\Controllers\Api\Global\HealthContentController;
 use App\Http\Controllers\Api\Labs\LabScheduleController;
 use App\Http\Controllers\Api\Patients\LabAppointmentController as PatientLabAppointmentController;
 use App\Http\Controllers\Api\Labs\LabAppointmentController as LabOwnerAppointmentController;
@@ -36,6 +37,8 @@ Route::get('/medical-departments', [MedicalDepartmentsController::class, 'show']
 Route::get('/medical-departments/{department_id}/clinics',
     [MedicalDepartmentsController::class, 'getClinicsByDepartment']
 );
+
+Route::get('/health-contents', [HealthContentController::class, 'index']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
@@ -101,4 +104,3 @@ Route::get('/clinics/{clinic_id}',[ClinicController::class, 'show']);
 // =========================================================
 Route::get('/notifications', [AppNotificationController::class, 'index']);
 Route::patch('/notifications/{notification_id}/delivered', [AppNotificationController::class, 'markDelivered']);
-
