@@ -14,13 +14,15 @@ class AutoUpdateAppointmentStatus extends Command
     public function handle(): int
     {
         $now = now();
+        $today = $now->toDateString();
 
-        $appointments = ClinicAppointment::whereDate('appointment_date', $now->toDateString())
+        $appointments = ClinicAppointment::whereNotNull('appointment_date')
+            ->whereDate('appointment_date', '<=', $today)
             ->whereIn('status', [
+                ClinicAppointment::STATUS_PENDING,
                 ClinicAppointment::STATUS_APPROVED,
                 ClinicAppointment::STATUS_WAITING,
             ])
-            ->whereNotNull('appointment_time')
             ->with('clinic.schedule')
             ->get();
 
@@ -34,7 +36,14 @@ class AutoUpdateAppointmentStatus extends Command
         foreach ($appointments as $appointment) {
             $schedule = $appointment->clinic?->schedule;
 
-            if (!$schedule || !$schedule->end_time) {
+            if ($appointment->appointment_date->lessThan($today)) {
+                $appointment->update(['status' => ClinicAppointment::STATUS_NO_SHOW]);
+                $this->info("الحجز #{$appointment->id}: {$appointment->status} (تاريخ {$appointment->appointment_date->toDateString()}) → لم يتم الحضور");
+                $updated++;
+                continue;
+            }
+
+            if (!$appointment->appointment_time || !$schedule || !$schedule->end_time) {
                 continue;
             }
 
@@ -42,9 +51,9 @@ class AutoUpdateAppointmentStatus extends Command
             $endTime = $schedule->end_time;
 
             if ($now >= $appointmentTime && $now < $endTime) {
-                if ($appointment->status === ClinicAppointment::STATUS_APPROVED) {
+                if ($appointment->status !== ClinicAppointment::STATUS_WAITING) {
                     $appointment->update(['status' => ClinicAppointment::STATUS_WAITING]);
-                    $this->info("الحجز #{$appointment->id}: مقبول → انتظار الحضور");
+                    $this->info("الحجز #{$appointment->id}: {$appointment->status} → انتظار الحضور");
                     $updated++;
                 }
             } elseif ($now >= $endTime) {
