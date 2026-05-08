@@ -19,9 +19,13 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             MedicalDepartmentSeeder::class,
             WeekdaySeeder::class,
+            ClinicSeeder::class,
             ExaminationSeeder::class,
+            LabSeeder::class,
             WalletSeeder::class,
             HealthContentSeeder::class,
+            PatientSeeder::class,
+            AppointmentSeeder::class,
         ]);
 
     }

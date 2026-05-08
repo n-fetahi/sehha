@@ -1,8 +1,9 @@
 <?php
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\MedicalDepartment;
+use Illuminate\Database\Seeder;
 
 class MedicalDepartmentSeeder extends Seeder
 {
@@ -13,13 +14,11 @@ class MedicalDepartmentSeeder extends Seeder
             'قلب',
             'أطفال',
             'جلدية',
-            'عظام'
+            'عظام',
         ];
 
-        foreach ($departments as $dept) {
-            MedicalDepartment::create([
-                'name' => $dept
-            ]);
+        foreach ($departments as $department) {
+            MedicalDepartment::updateOrCreate(['name' => $department]);
         }
     }
 }
