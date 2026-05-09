@@ -51,11 +51,10 @@ class ProviderStatusController extends Controller
         return response()->json([
             'status' => 200,
             'data' => [
-                'user_id' => $user->id,
-                'user_type' => $user->user_type,
                 'user_status' => $user->user_status,
                 'license_status' => $provider->license_status,
                 'commercial_reg_status' => $provider->commercial_reg_status,
+                'rejection_reason' => $provider->rejection_reason,
             ],
         ], 200);
     }
@@ -150,13 +149,6 @@ class ProviderStatusController extends Controller
         return response()->json([
             'status' => 200,
             'message' => 'تم إرسال الوثائق للمراجعة بنجاح',
-            'data' => [
-                'user_id' => $user->id,
-                'user_type' => $user->user_type,
-                'user_status' => $user->user_status,
-                'license_status' => $provider->fresh()->license_status,
-                'commercial_reg_status' => $provider->fresh()->commercial_reg_status,
-            ],
         ], 200);
     }
 }
