@@ -147,6 +147,8 @@ class LabAppointmentController extends Controller
 
             DB::commit();
 
+            \App\Services\AppNotificationService::newLabBooking($labAppointment);
+
             return response()->json([
                 'status' => 200,
                 'message' => 'تم الحجز بنجاح'

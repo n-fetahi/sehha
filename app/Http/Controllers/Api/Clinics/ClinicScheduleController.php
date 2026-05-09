@@ -329,6 +329,8 @@ public function getFollowUpAvailableDates(Request $request): JsonResponse
             ]);
         }
 
+        \App\Services\AppNotificationService::followUpAdded($followUpAppointment);
+
         return response()->json([
             'status' => 200,
             'message' => 'تم حفظ موعد المتابعة بنجاح',

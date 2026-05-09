@@ -301,6 +301,14 @@ public function updateStatus(Request $request, int $appointment_id): JsonRespons
 
     $appointment->update($updateData);
 
+    if ($request->status === ClinicAppointment::STATUS_APPROVED) {
+        \App\Services\AppNotificationService::clinicApproved($appointment);
+    } elseif ($request->status === ClinicAppointment::STATUS_REJECTED) {
+        \App\Services\AppNotificationService::clinicRejected($appointment);
+    } elseif ($request->status === ClinicAppointment::STATUS_COMPLETED) {
+        \App\Services\AppNotificationService::clinicCompleted($appointment);
+    }
+
     return response()->json([
         'status' => 200,
         'message' => 'تم تحديث حالة الحجز بنجاح',
@@ -348,6 +356,8 @@ public function updateStatus(Request $request, int $appointment_id): JsonRespons
 
         // تحديث الحقول المرسلة فقط (إن لم تُرسَل نبقِي القيمة الحالية)
         $appointment->update($request->only(['diagnosis', 'medications']));
+
+        \App\Services\AppNotificationService::medicalInfoAdded($appointment);
 
         return response()->json([
             'status' => 200,

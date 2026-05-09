@@ -159,6 +159,8 @@ class LabAppointmentController extends Controller
             'status' => 'completed',
         ]);
 
+        \App\Services\AppNotificationService::labResultReady($appointment);
+
         // 6. رد النجاح
         return response()->json([
             'status' => 200,

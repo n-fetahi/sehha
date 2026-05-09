@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\ClinicAppointment;
+use App\Services\AppNotificationService;
 use Illuminate\Console\Command;
 
 class AutoUpdateAppointmentStatus extends Command
@@ -23,7 +24,7 @@ class AutoUpdateAppointmentStatus extends Command
                 ClinicAppointment::STATUS_APPROVED,
                 ClinicAppointment::STATUS_WAITING,
             ])
-            ->with('clinic.schedule')
+            ->with(['clinic.schedule', 'patient.user'])
             ->get();
 
         if ($appointments->isEmpty()) {
@@ -38,6 +39,7 @@ class AutoUpdateAppointmentStatus extends Command
 
             if ($appointment->appointment_date->lessThan($today)) {
                 $appointment->update(['status' => ClinicAppointment::STATUS_NO_SHOW]);
+                AppNotificationService::appointmentNoShow($appointment);
                 $this->info("الحجز #{$appointment->id}: {$appointment->status} (تاريخ {$appointment->appointment_date->toDateString()}) → لم يتم الحضور");
                 $updated++;
                 continue;
@@ -53,12 +55,14 @@ class AutoUpdateAppointmentStatus extends Command
             if ($now >= $appointmentTime && $now < $endTime) {
                 if ($appointment->status !== ClinicAppointment::STATUS_WAITING) {
                     $appointment->update(['status' => ClinicAppointment::STATUS_WAITING]);
+                    AppNotificationService::appointmentWaiting($appointment);
                     $this->info("الحجز #{$appointment->id}: {$appointment->status} → انتظار الحضور");
                     $updated++;
                 }
             } elseif ($now >= $endTime) {
                 if ($appointment->status !== ClinicAppointment::STATUS_NO_SHOW) {
                     $appointment->update(['status' => ClinicAppointment::STATUS_NO_SHOW]);
+                    AppNotificationService::appointmentNoShow($appointment);
                     $this->info("الحجز #{$appointment->id}: {$appointment->status} → لم يتم الحضور");
                     $updated++;
                 }

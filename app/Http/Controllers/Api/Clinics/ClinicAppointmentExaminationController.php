@@ -108,6 +108,8 @@ class ClinicAppointmentExaminationController extends Controller
             ]);
         }
 
+        \App\Services\AppNotificationService::examinationsAdded($appointment);
+
         return response()->json([
             'status' => 200,
             'message' => 'تم إضافة الفحوصات المطلوبة بنجاح',

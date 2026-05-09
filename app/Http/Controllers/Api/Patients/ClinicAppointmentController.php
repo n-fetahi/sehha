@@ -179,6 +179,8 @@ public function show(Request $request, int $appointment_id): JsonResponse
             'type' => ClinicAppointment::TYPE_CONSULTATION,
         ]);
 
+        \App\Services\AppNotificationService::newClinicBooking($appointment);
+
         return response()->json([
             'status' => 200,
             'message' => 'تم حجز الموعد بنجاح',
@@ -581,6 +583,8 @@ public function getAvailableTimes(Request $request, $clinic_id): JsonResponse
         $appointment->update([
             'status' => 'cancelled',
         ]);
+
+        \App\Services\AppNotificationService::clinicCancelled($appointment);
 
         return response()->json([
             'status' => 200,
