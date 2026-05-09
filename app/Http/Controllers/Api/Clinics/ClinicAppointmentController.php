@@ -307,6 +307,8 @@ public function updateStatus(Request $request, int $appointment_id): JsonRespons
         \App\Services\AppNotificationService::clinicRejected($appointment);
     } elseif ($request->status === ClinicAppointment::STATUS_COMPLETED) {
         \App\Services\AppNotificationService::clinicCompleted($appointment);
+    } elseif ($request->status === ClinicAppointment::STATUS_CANCELLED) {
+        \App\Services\AppNotificationService::clinicCancelledByClinic($appointment);
     }
 
     return response()->json([

@@ -74,6 +74,17 @@ class AppNotificationService
         }
     }
 
+    public static function clinicCancelledByClinic(ClinicAppointment $appointment): void
+    {
+        $appointment->loadMissing('patient');
+
+        $reason = $appointment->cancelled_reason ?? 'غير محدد';
+        $title = 'تم إلغاء الحجز';
+        $content = "تم إلغاء حجزك بسبب: {$reason}";
+
+        self::store($appointment->patient->user_id, $title, $content);
+    }
+
     public static function examinationsAdded(ClinicAppointment $appointment): void
     {
         $appointment->loadMissing('patient');
