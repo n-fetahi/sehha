@@ -112,6 +112,7 @@ public function registerLab(LabRegisterRequest $request)
         'password' => bcrypt($request->password),
         'user_type' => 'lab',
         'gender' => $request->gender ?? null,
+        'user_status' => 'restricted',
         'verification_code' => $verificationCode,
         'verification_code_expires_at' => now()->addMinutes(3),
     ]);
@@ -162,6 +163,7 @@ public function registerLab(LabRegisterRequest $request)
         'password' => Hash::make($request->password),
         'user_type' => 'clinic',
         'gender' => $request->gender ?? null,
+        'user_status' => 'restricted',
         'verification_code' => $verificationCode,
         'verification_code_expires_at' => now()->addMinutes(3),
     ]);
@@ -239,6 +241,8 @@ public function registerLab(LabRegisterRequest $request)
         
         if ($user->user_type === 'patient') {
             $updateData['user_status'] = 'approved';
+        } else {
+            $updateData['user_status'] = 'pending';
         }
         
         $user->update($updateData);
