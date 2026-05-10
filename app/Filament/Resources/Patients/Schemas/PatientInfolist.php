@@ -54,7 +54,6 @@ class PatientInfolist
                     ->placeholder('-'),
                 ImageEntry::make('patient.profile_picture')
                     ->label('الصورة الشخصية')
-                    ->disk('public')
                     ->placeholder('-'),
                 TextEntry::make('created_at')
                     ->label('تاريخ التسجيل')

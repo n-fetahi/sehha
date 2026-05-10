@@ -27,7 +27,7 @@ class LabForm
                 FileUpload::make('license')
                     ->label('رخصة الترخيص')
                     ->directory('licenses')
-                    ->disk('public')
+                    
                     ->downloadable()
                     ->openable()
                     ->required(),
@@ -36,7 +36,7 @@ class LabForm
                 FileUpload::make('commercial_reg')
                     ->label('السجل التجاري')
                     ->directory('commercial_regs')
-                    ->disk('public')
+                    
                     ->downloadable()
                     ->openable()
                     ->required(),
@@ -50,8 +50,7 @@ class LabForm
                 FileUpload::make('profile_picture')
                     ->label('صورة المختبر')
                     ->image()
-                    ->directory('labs')
-                    ->disk('public'),
+                    ->directory('labs'),
                 TextInput::make('rating')
                     ->required()
                     ->numeric()

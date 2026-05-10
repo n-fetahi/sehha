@@ -144,7 +144,7 @@ class LabAppointmentController extends Controller
         $file = $request->file('result');
         $folder = 'results';
         $filename = 'appointment_' . $appointment_id . '_' . time() . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs($folder, $filename, 'public');
+        $path = $file->storeAs($folder, $filename);
 
         if (!$path) {
             return response()->json([

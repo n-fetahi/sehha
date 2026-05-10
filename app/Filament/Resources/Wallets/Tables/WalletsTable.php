@@ -21,7 +21,6 @@ class WalletsTable
 
                 ImageColumn::make('image')
                     ->label('الصورة')
-                    ->disk('public')
                     ->circular()
                     ->size(50),
 

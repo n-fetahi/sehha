@@ -237,7 +237,7 @@ private function getDetailsFormSchema(User $user): array
                 // ✅ رخصة الترخيص - مع زر المعاينة
                 Forms\Components\FileUpload::make('license_file')
                     ->label('رخصة الترخيص')
-                    ->disk('public')
+                    
                     ->directory('licenses')
                     ->downloadable()
                     ->openable()
@@ -249,7 +249,7 @@ private function getDetailsFormSchema(User $user): array
                 // ✅ السجل التجاري - مع زر المعاينة
                 Forms\Components\FileUpload::make('commercial_reg_file')
                     ->label('السجل التجاري')
-                    ->disk('public')
+                    
                     ->directory('commercial_regs')
                     ->downloadable()
                     ->openable()

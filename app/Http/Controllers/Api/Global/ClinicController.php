@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Global;
 use App\Http\Controllers\Concerns\FormatsTime;
 use App\Http\Controllers\Controller;
 use App\Models\Clinic;
+use Illuminate\Support\Facades\Storage;
 
 
 
@@ -36,7 +37,7 @@ class ClinicController extends Controller
             'name'                => $clinic->name,
             'phone'               => $clinic->phone,
             'location'            => $clinic->location,
-            'profile_picture'     => $clinic->profile_picture,
+            'profile_picture'     => $clinic->profile_picture ? Storage::url($clinic->profile_picture) : null,
             'user_name'           => $clinic->user->name ?? null,
             'rating'              => 3.5,
             'years_of_experience' => $clinic->years_of_experience,

@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Api\Global;
 use App\Http\Controllers\Concerns\FormatsTime;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
- use App\Models\Lab;
- use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Lab;
+use Carbon\Carbon;
 
 class LabController extends Controller
 {
@@ -53,7 +54,7 @@ class LabController extends Controller
             'name'             => $lab->name,
             'phone'            => $lab->phone,
             'location'         => $lab->location,
-            'profile_picture'  => $lab->profile_picture,
+            'profile_picture'  => $lab->profile_picture ? Storage::url($lab->profile_picture) : null,
             'medical_director' => $lab->medical_director,
             'rating'           => 3.5,
             'is_available'     => $lab->schedule ? $lab->schedule->is_available : false,

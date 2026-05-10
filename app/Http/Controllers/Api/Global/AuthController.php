@@ -118,11 +118,11 @@ public function registerLab(LabRegisterRequest $request)
     ]);
 
     // ✅ تخزين الملفات مباشرة بدلاً من Base64
-    $licensePath = $request->file('license')->store('licenses', 'public');
-    $commercialPath = $request->file('commercial_reg')->store('commercial_regs', 'public');
+    $licensePath = $request->file('license')->store('licenses');
+    $commercialPath = $request->file('commercial_reg')->store('commercial_regs');
 
     $profilePicturePath = $request->hasFile('profile_picture')
-        ? $request->file('profile_picture')->store('profiles', 'public')
+        ? $request->file('profile_picture')->store('profiles')
         : null;
 
     // إنشاء سجل المختبر
@@ -169,11 +169,11 @@ public function registerLab(LabRegisterRequest $request)
     ]);
 
     // ✅ تخزين الملفات مباشرة بدلاً من Base64
-    $licensePath = $request->file('license')->store('licenses', 'public');
-    $commercialPath = $request->file('commercial_reg')->store('commercial_regs', 'public');
+    $licensePath = $request->file('license')->store('licenses');
+    $commercialPath = $request->file('commercial_reg')->store('commercial_regs');
 
     $profilePicturePath = $request->hasFile('profile_picture')
-        ? $request->file('profile_picture')->store('profiles', 'public')
+        ? $request->file('profile_picture')->store('profiles')
         : null;
 
     // إنشاء سجل العيادة

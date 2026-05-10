@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Labs\Schemas;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class LabInfolist
 {
@@ -21,7 +22,7 @@ class LabInfolist
                 TextEntry::make('license')
                     ->label('رخصة الترخيص')
                     ->badge()
-                    ->url(fn($state) => $state ? asset('storage/' . $state) : null, shouldOpenInNewTab: true)
+                    ->url(fn($state) => $state ? Storage::url($state) : null, shouldOpenInNewTab: true)
                     ->placeholder('-'),
                 TextEntry::make('license_status')
                     ->badge()
@@ -35,7 +36,7 @@ class LabInfolist
                 TextEntry::make('commercial_reg')
                     ->label('السجل التجاري')
                     ->badge()
-                    ->url(fn($state) => $state ? asset('storage/' . $state) : null, shouldOpenInNewTab: true)
+                    ->url(fn($state) => $state ? Storage::url($state) : null, shouldOpenInNewTab: true)
                     ->placeholder('-'),
                 TextEntry::make('commercial_reg_status')
                     ->badge()
@@ -53,7 +54,6 @@ class LabInfolist
                     ->label('اسم المستخدم'),
                 ImageEntry::make('profile_picture')
                     ->label('صورة المختبر')
-                    ->disk('public')
                     ->placeholder('-'),
                 TextEntry::make('rating')
                     ->numeric(),

@@ -127,19 +127,19 @@ class ProviderStatusController extends Controller
 
         if ($request->hasFile('license')) {
             if ($provider->license) {
-                Storage::disk('public')->delete($provider->license);
+                Storage::delete($provider->license);
             }
 
-            $updateData['license'] = $request->file('license')->store('licenses', 'public');
+            $updateData['license'] = $request->file('license')->store('licenses');
             $updateData['license_status'] = 'pending';
         }
 
         if ($request->hasFile('commercial_reg')) {
             if ($provider->commercial_reg) {
-                Storage::disk('public')->delete($provider->commercial_reg);
+                Storage::delete($provider->commercial_reg);
             }
 
-            $updateData['commercial_reg'] = $request->file('commercial_reg')->store('commercial_regs', 'public');
+            $updateData['commercial_reg'] = $request->file('commercial_reg')->store('commercial_regs');
             $updateData['commercial_reg_status'] = 'pending';
         }
 
