@@ -2,32 +2,32 @@
 :root {
 
     /* الألوان الأصلية */
-    --primary:   #490066;
-    --secondary: #b60c76;
+    --primary:   #2196F3;
+    --secondary: #607D8B;
 
-    /* تدرجات الـ PRIMARY (#490066) */
-    --primary-50:  #ede6f0;
-    --primary-100: #d2bfd9;
-    --primary-200: #b699c2;
-    --primary-300: #9b73ab;
-    --primary-400: #804c94;
-    --primary-500: #490066; /* الأساسي */
-    --primary-600: #3a0052;
-    --primary-700: #2c003d;
-    --primary-800: #1d0029;
-    --primary-900: #12001a;
+    /* تدرجات الـ PRIMARY (#2196F3) */
+    --primary-50:  #E3F2FD;
+    --primary-100: #BBDEFB;
+    --primary-200: #90CAF9;
+    --primary-300: #64B5F6;
+    --primary-400: #42A5F5;
+    --primary-500: #2196F3; /* الأساسي */
+    --primary-600: #1E88E5;
+    --primary-700: #1976D2;
+    --primary-800: #1565C0;
+    --primary-900: #0D47A1;
 
-    /* تدرجات الـ SECONDARY (#b60c76) */
-    --secondary-50:  #f8e7f1;
-    --secondary-100: #edc2dd;
-    --secondary-200: #e29ec8;
-    --secondary-300: #d779b4;
-    --secondary-400: #cc559f;
-    --secondary-500: #b60c76; /* الأساسي */
-    --secondary-600: #920a5e;
-    --secondary-700: #6d0747;
-    --secondary-800: #49052f;
-    --secondary-900: #2e031e;
+    /* تدرجات الـ SECONDARY (#607D8B) */
+    --secondary-50:  #ECEFF1;
+    --secondary-100: #CFD8DC;
+    --secondary-200: #B0BEC5;
+    --secondary-300: #90A4AE;
+    --secondary-400: #78909C;
+    --secondary-500: #607D8B; /* الأساسي */
+    --secondary-600: #546E7A;
+    --secondary-700: #455A64;
+    --secondary-800: #37474F;
+    --secondary-900: #263238;
 
     /* Gradients جاهزة للاستخدام */
     --primary-gradient:   linear-gradient(135deg, var(--primary-400),   var(--primary-700));
@@ -503,7 +503,7 @@ h6,
    =========================== */
 .why-card {
     background: linear-gradient(180deg, #ffffff 0%, #f8f4fb 100%);
-    border: 1px solid rgba(73, 0, 102, 0.08);
+    border: 1px solid rgba(33, 150, 243, 0.08);
     border-radius: 18px;
     padding: 26px 22px;
     box-shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
@@ -516,7 +516,7 @@ h6,
 
 .why-card:hover {
     transform: translateY(-8px);
-    border-color: rgba(73, 0, 102, 0.22);
+    border-color: rgba(33, 150, 243, 0.22);
     box-shadow: 0 24px 55px rgba(0, 0, 0, 0.14);
 }
 
@@ -530,7 +530,7 @@ h6,
     justify-content: center;
     color: #ffffff;
     font-size: 28px;
-    box-shadow: 0 12px 24px rgba(73, 0, 102, 0.25);
+    box-shadow: 0 12px 24px rgba(33, 150, 243, 0.25);
 }
 
 .why-card-title {
@@ -600,7 +600,7 @@ h6,
     border-radius: 50%;
     background: var(--primary-gradient);
     color: #ffffff;
-    box-shadow: 0 12px 24px rgba(73, 0, 102, 0.25);
+    box-shadow: 0 12px 24px rgba(33, 150, 243, 0.25);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -627,7 +627,7 @@ h6,
 .products-swiper .swiper-button-next:hover {
     transform: translateY(-2px);
     background: var(--primary-gradient-hover);
-    box-shadow: 0 16px 32px rgba(73, 0, 102, 0.32);
+    box-shadow: 0 16px 32px rgba(33, 150, 243, 0.32);
 }
 
 .products-swiper .swiper-pagination-bullet {
@@ -813,7 +813,7 @@ h6,
     display: flex;
     flex-direction: column;
     position: relative;
-    border: 1px solid rgba(73, 0, 102, 0.06);
+    border: 1px solid rgba(33, 150, 243, 0.06);
 }
 
 /* إلغاء أي ::before قديم من القالب الأصلي */
@@ -824,7 +824,7 @@ h6,
 .miniCard:hover {
     transform: translateY(-8px);
     box-shadow: 0 20px 45px rgba(10, 0, 30, 0.25);
-    border-color: rgba(73, 0, 102, 0.18);
+    border-color: rgba(33, 150, 243, 0.18);
 }
 
 @keyframes miniCard {
@@ -894,7 +894,7 @@ h6,
     border-radius: 999px;
     cursor: pointer;
     transition: background-image 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 8px 16px rgba(73, 0, 102, 0.35);
+    box-shadow: 0 8px 16px rgba(33, 150, 243, 0.35);
     font-weight: 600;
     letter-spacing: 0.03em;
     text-transform: uppercase;
@@ -903,7 +903,7 @@ h6,
 .product-card-btn:hover {
     background-image: var(--secondary-gradient-hover);
     transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(182, 12, 118, 0.4);
+    box-shadow: 0 10px 24px rgba(96, 125, 139, 0.4);
 }
 
 /* ===========================

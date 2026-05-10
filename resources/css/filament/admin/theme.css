@@ -1,20 +1,143 @@
 @config './tailwind.config.js';
 
-/* ---- تعديل الصفحة ---- */
+/* ========================================
+   Sehha (Dhofar) - Custom Filament Theme
+   ======================================== */
 
-/* الخلفية العامة */
+/* ---- الخلفية العامة ---- */
 .fi-main,
 .fi-main-content {
-    @apply bg-white dark:bg-slate-900;
+    @apply bg-gray-50 dark:bg-slate-900;
 }
 
-/* القائمة الجانبية */
+/* ---- القائمة الجانبية ---- */
 .fi-sidebar {
     @apply bg-black text-white;
     @apply dark:bg-white dark:text-slate-900;
 }
 
-/* الروابط داخل القائمة */
 .fi-sidebar .fi-sidebar-item-button {
     @apply hover:bg-white/10 dark:hover:bg-black/10;
+}
+
+/* مجموعات القائمة الجانبية */
+.fi-sidebar-group .fi-sidebar-group-label {
+    @apply text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 px-4 py-2;
+}
+
+/* ---- تنسيق البطاقات (Sections) ---- */
+.fi-section {
+    @apply bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700;
+}
+
+.fi-section .fi-section-header {
+    @apply border-b border-gray-100 dark:border-gray-700 pb-4;
+}
+
+.fi-section .fi-section-header-heading {
+    @apply text-lg font-bold text-gray-900 dark:text-white;
+}
+
+.fi-section .fi-section-header-description {
+    @apply text-sm text-gray-500 dark:text-gray-400 mt-1;
+}
+
+/* ---- تنسيق الجداول ---- */
+.fi-table {
+    @apply border-collapse;
+}
+
+.fi-table thead th {
+    @apply text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-800/50 px-4 py-3;
+}
+
+.fi-table tbody tr {
+    @apply border-b border-gray-100 dark:border-gray-700 transition-colors;
+}
+
+.fi-table tbody tr:hover {
+    @apply bg-primary-50/30 dark:bg-primary-900/10;
+}
+
+/* ---- تنسيق الأزرار ---- */
+.fi-btn {
+    @apply rounded-lg font-medium transition-all duration-150;
+}
+
+.fi-btn-primary {
+    @apply shadow-sm;
+}
+
+/* ---- تنسيق الحقول (Inputs) ---- */
+.fi-input {
+    @apply rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white;
+}
+
+.fi-input:focus {
+    @apply ring-2 ring-primary-500 border-primary-500;
+}
+
+/* ---- تنسيق التبويبات (Tabs) ---- */
+.fi-tabs {
+    @apply border-b border-gray-200 dark:border-gray-700;
+}
+
+.fi-tabs .fi-tab {
+    @apply px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 border-b-2 border-transparent transition-all;
+}
+
+.fi-tabs .fi-tab.fi-active {
+    @apply text-primary-600 dark:text-primary-400 border-primary-600 dark:border-primary-400;
+}
+
+/* ---- تنسيق الشارات (Badges) ---- */
+.fi-badge {
+    @apply font-medium px-2.5 py-0.5 rounded-full text-xs;
+}
+
+/* ---- تنسيق بطاقات Dashboard ---- */
+.fi-widget {
+    @apply bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700;
+}
+
+/* ---- تنسيق النوافذ المنبثقة (Modals) ---- */
+.fi-modal-window {
+    @apply rounded-2xl shadow-2xl;
+}
+
+.fi-modal-header {
+    @apply border-b border-gray-100 dark:border-gray-700;
+}
+
+/* ---- تنسيق صفحات Infolist ---- */
+.fi-infolist {
+    @apply divide-y divide-gray-100 dark:divide-gray-700;
+}
+
+.fi-infolist .fi-infolist-entry-label {
+    @apply text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400;
+}
+
+/* ---- تنسيق عنوان الصفحة ---- */
+.fi-page-header {
+    @apply border-b border-gray-200 dark:border-gray-700 pb-4 mb-6;
+}
+
+.fi-page-header .fi-page-header-heading {
+    @apply text-2xl font-bold text-gray-900 dark:text-white;
+}
+
+/* ---- تحسين هوامش المحتوى ---- */
+.fi-main-content {
+    @apply p-6;
+}
+
+/* ---- بطاقات Pages (مثل PendingRequests) ---- */
+.fi-page {
+    @apply space-y-6;
+}
+
+/* ---- Grid البطاقات (للـ Card layout) ---- */
+.fi-grid {
+    @apply gap-4;
 }

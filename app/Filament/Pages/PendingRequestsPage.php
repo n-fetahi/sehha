@@ -102,10 +102,6 @@ public static function getNavigationLabel(): string
                 Tables\Columns\TextColumn::make('relation_license_number')
                     ->label('رقم الترخيص')
                     ->getStateUsing(fn(User $r) => $this->getRelated($r, 'license_number')),
-
-                Tables\Columns\TextColumn::make('phone')
-                                    ->label('الهاتف')
-                                    ->searchable(),
             ])
             ->actions([
                 Action::make('view')
